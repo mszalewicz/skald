@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"log/slog"
 	"os"
 
@@ -19,7 +18,6 @@ func init() {
 }
 
 func main() {
-
 	var (
 		screen    gui.Screen
 		width     int
@@ -27,6 +25,9 @@ func main() {
 		minWidth  int
 		minHeight int
 	)
+
+	localLog := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	slog.SetDefault(localLog)
 
 	_ = network.Backend{}
 
@@ -50,7 +51,7 @@ func main() {
 
 		if err != nil {
 			slog.Error(err.Error())
-			log.Fatal(err)
+			os.Exit(1)
 		}
 		os.Exit(0)
 	}()
