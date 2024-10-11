@@ -1,8 +1,11 @@
 package gui
 
 import (
+	"fmt"
+
 	"gioui.org/app"
 	"gioui.org/font/gofont"
+	"gioui.org/io/key"
 	"gioui.org/op"
 	"gioui.org/text"
 	"gioui.org/widget/material"
@@ -11,6 +14,11 @@ import (
 type Screen struct {
 	Width  int
 	Height int
+}
+
+type Settings struct {
+	screen   Screen
+	fontsize int
 }
 
 func MainWindow(window *app.Window, screen *Screen) error {
@@ -27,7 +35,21 @@ func MainWindow(window *app.Window, screen *Screen) error {
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
 
+			for {
+				ev, ok := gtx.Event(
+					key.Filter{Optional: key.ModCommand, Name: "="},
+					key.Filter{Optional: key.ModCommand, Name: "-"},
+				)
+
+				if !ok {
+					break
+				}
+
+				fmt.Printf("KEY: %+v\n", ev)
+			}
+
 			e.Frame(gtx.Ops)
+
 		}
 	}
 }
