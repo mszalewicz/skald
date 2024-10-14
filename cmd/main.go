@@ -19,12 +19,15 @@ func init() {
 
 func main() {
 	var (
+		settings  gui.Settings
 		screen    gui.Screen
 		width     int
 		height    int
 		minWidth  int
 		minHeight int
 	)
+
+	settings.Fontsize = 10
 
 	localLog := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	slog.SetDefault(localLog)
@@ -47,7 +50,7 @@ func main() {
 		window.Option(app.Title("Skald"))
 		window.Option(app.Size(unit.Dp(width), unit.Dp(height)))
 		window.Option(app.MinSize(unit.Dp(minWidth), unit.Dp(minHeight)))
-		err := gui.MainWindow(window, &screen)
+		err := gui.MainWindow(window, &screen, &settings)
 
 		if err != nil {
 			slog.Error(err.Error())

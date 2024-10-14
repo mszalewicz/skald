@@ -17,11 +17,11 @@ type Screen struct {
 }
 
 type Settings struct {
-	screen   Screen
-	fontsize int
+	Screen   Screen
+	Fontsize int
 }
 
-func MainWindow(window *app.Window, screen *Screen) error {
+func MainWindow(window *app.Window, screen *Screen, settings *Settings) error {
 	var ops op.Ops
 
 	theme := material.NewTheme()
@@ -45,7 +45,29 @@ func MainWindow(window *app.Window, screen *Screen) error {
 					break
 				}
 
-				fmt.Printf("KEY: %+v\n", ev)
+				if ev.(key.Event).State == key.Press {
+					name := ev.(key.Event).Name
+					mod := ev.(key.Event).Modifiers
+
+					if mod == key.ModCommand || mod == key.ModCtrl {
+						switch name {
+						case "=":
+							if settings.Fontsize < 40 {
+								settings.Fontsize += 1
+							}
+						case "-":
+							if settings.Fontsize > 8 {
+								settings.Fontsize -= 1
+
+							}
+						}
+
+						fmt.Println(settings.Fontsize)
+					}
+
+				}
+				// fmt.Printf("KEY: %+v\n", ev)
+				// fmt.Println(settings.Fontsize)
 			}
 
 			e.Frame(gtx.Ops)
