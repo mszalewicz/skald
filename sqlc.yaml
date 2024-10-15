@@ -1,0 +1,8 @@
+version: "2"
+sql:
+  - engine: "sqlite"
+    queries: "query.sql"
+    gen:
+      go:
+        package: "github.com/mszalewicz/skald"
+        out: "database"
