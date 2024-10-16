@@ -24,9 +24,12 @@ go.work.sum
 # env file
 .env
 
+# Local development files
+db.sqlite
+
 # macOS
 .DS_Store
 
-# binaries
+# Binaries
 skald
 skald.exe
