@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"context"
 	"fmt"
 
 	"gioui.org/app"
@@ -9,6 +10,13 @@ import (
 	"gioui.org/op"
 	"gioui.org/text"
 	"gioui.org/widget/material"
+
+	_ "embed"
+	"log"
+
+	_ "github.com/mattn/go-sqlite3"
+
+	"github.com/mszalewicz/skald/database"
 )
 
 type Screen struct {
@@ -21,7 +29,7 @@ type Settings struct {
 	Fontsize int
 }
 
-func MainWindow(window *app.Window, screen *Screen, settings *Settings) error {
+func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend *database.Backend) error {
 	var ops op.Ops
 
 	theme := material.NewTheme()
@@ -63,6 +71,26 @@ func MainWindow(window *app.Window, screen *Screen, settings *Settings) error {
 						}
 
 						fmt.Println(settings.Fontsize)
+
+						ctx := context.Background()
+						queries := database.New(backend.DB)
+
+						insertedSetting, err := queries.CreateSetting(ctx, database.CreateSettingParams{
+							Width:    3840,
+							Height:   2160,
+							Fontsize: 16,
+						})
+
+						if err != nil {
+							log.Fatal(err)
+						}
+						log.Println(insertedSetting)
+
+						settings, err := queries.ListSettings(ctx)
+						for _, setting := range settings {
+							fmt.Println(setting.Width, setting.Height, setting.Fontsize)
+						}
+
 					}
 
 				}
