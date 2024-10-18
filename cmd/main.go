@@ -5,11 +5,13 @@ import (
 	_ "embed"
 	"log"
 	"log/slog"
+	"net/url"
 	"os"
 
 	"gioui.org/app"
 	"gioui.org/unit"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/mszalewicz/skald/assert"
 	"github.com/mszalewicz/skald/database"
 	"github.com/mszalewicz/skald/gui"
 	"github.com/mszalewicz/skald/network"
@@ -19,10 +21,11 @@ import (
 var schema string
 var backend database.Backend
 
-func init() {
+const databaseName string = "skald.db"
 
+func init() {
 	{ // Create local db if it does not exist
-		dbFile, err := os.OpenFile("db.sqlite", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+		dbFile, err := os.OpenFile(databaseName, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 		if err != nil {
 			slog.Error("Could not create log file.", "error", err)
 		}
@@ -30,13 +33,23 @@ func init() {
 	}
 
 	{ // Init database
-		db, err := sql.Open("sqlite3", "db.sqlite")
+		connectionUrlParams := make(url.Values)
+		connectionUrlParams.Add("_txlock", "immediate")
+		connectionUrlParams.Add("_journal_mode", "WAL")
+		connectionUrlParams.Add("_busy_timeout", "5000")
+		connectionUrlParams.Add("_synchronous", "NORMAL")
+		connectionUrlParams.Add("_cache_size", "1000000000")
+		connectionUrlParams.Add("_foreign_keys", "true")
+		connectionUrl := "file:" + databaseName + "?" + connectionUrlParams.Encode()
+
+		db, err := sql.Open("sqlite3", connectionUrl)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		backend.DB = db
+		assert.AssertNil(backend.DB)
 
 		// Create tables
 		if _, err := backend.DB.Exec(schema); err != nil {
