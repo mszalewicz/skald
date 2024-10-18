@@ -25,7 +25,10 @@ go.work.sum
 .env
 
 # Local development files
-db.sqlite
+skald.db
+skald.db-shm
+skald.db-wal
+
 
 # macOS
 .DS_Store
