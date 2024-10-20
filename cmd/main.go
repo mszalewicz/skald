@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	_ "embed"
+	"fmt"
 	"log"
 	"log/slog"
 	"net/url"
@@ -11,6 +12,7 @@ import (
 	"gioui.org/app"
 	"gioui.org/unit"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/google/uuid"
 	"github.com/mszalewicz/skald/assert"
 	"github.com/mszalewicz/skald/database"
 	"github.com/mszalewicz/skald/gui"
@@ -55,6 +57,9 @@ func init() {
 		if _, err := backend.DB.Exec(schema); err != nil {
 			log.Fatal(err)
 		}
+
+		a := uuid.NewString()
+		fmt.Println(a)
 	}
 
 	if err := glfw.Init(); err != nil {

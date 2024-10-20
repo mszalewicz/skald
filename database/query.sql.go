@@ -9,6 +9,31 @@ import (
 	"context"
 )
 
+const createAccount = `-- name: CreateAccount :one
+
+INSERT INTO account (
+  uuid, name
+) VALUES (
+  ?, ?
+)
+RETURNING uuid, name
+`
+
+type CreateAccountParams struct {
+	Uuid string
+	Name string
+}
+
+// ---------------------------------------------------------------
+// - Account -----------------------------------------------------
+// ---------------------------------------------------------------
+func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
+	row := q.db.QueryRowContext(ctx, createAccount, arg.Uuid, arg.Name)
+	var i Account
+	err := row.Scan(&i.Uuid, &i.Name)
+	return i, err
+}
+
 const createSetting = `-- name: CreateSetting :one
 INSERT INTO settings (
   width, height, fontsize
@@ -47,9 +72,13 @@ func (q *Queries) DeleteAuthor(ctx context.Context, id int64) error {
 }
 
 const getSettings = `-- name: GetSettings :many
+
 SELECT id, width, height, fontsize FROM settings
 `
 
+// ---------------------------------------------------------------
+// - Settings ----------------------------------------------------
+// ---------------------------------------------------------------
 func (q *Queries) GetSettings(ctx context.Context) ([]Setting, error) {
 	rows, err := q.db.QueryContext(ctx, getSettings)
 	if err != nil {
@@ -123,9 +152,25 @@ func (q *Queries) ListSettings(ctx context.Context) ([]Setting, error) {
 	return items, nil
 }
 
+const updateAccount = `-- name: UpdateAccount :exec
+UPDATE account
+SET name = ?
+WHERE uuid = ?
+`
+
+type UpdateAccountParams struct {
+	Name string
+	Uuid string
+}
+
+func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) error {
+	_, err := q.db.ExecContext(ctx, updateAccount, arg.Name, arg.Uuid)
+	return err
+}
+
 const updateSetting = `-- name: UpdateSetting :exec
 UPDATE settings
-set width = ?,
+SET width = ?,
 height = ?,
 fontsize = ?
 WHERE id = ?

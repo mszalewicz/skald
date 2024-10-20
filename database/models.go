@@ -4,6 +4,11 @@
 
 package database
 
+type Account struct {
+	Uuid string
+	Name string
+}
+
 type Setting struct {
 	ID       int64
 	Width    int64

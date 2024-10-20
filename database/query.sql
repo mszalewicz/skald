@@ -1,3 +1,31 @@
+-----------------------------------------------------------------
+--- Account -----------------------------------------------------
+-----------------------------------------------------------------
+
+-- name: CreateAccount :one
+INSERT INTO account (
+  uuid, name
+) VALUES (
+  ?, ?
+)
+RETURNING *;
+
+-- name: UpdateAccount :exec
+UPDATE account
+SET name = ?
+WHERE uuid = ?;
+
+INSERT INTO account (
+  uuid, name
+) VALUES (
+  ?, ?, ?
+)
+RETURNING *;
+
+-----------------------------------------------------------------
+--- Settings ----------------------------------------------------
+-----------------------------------------------------------------
+
 -- name: GetSettings :many
 SELECT * FROM settings;
 
@@ -19,7 +47,7 @@ RETURNING *;
 
 -- name: UpdateSetting :exec
 UPDATE settings
-set width = ?,
+SET width = ?,
 height = ?,
 fontsize = ?
 WHERE id = ?;
@@ -27,3 +55,5 @@ WHERE id = ?;
 -- name: DeleteAuthor :exec
 DELETE FROM settings
 WHERE id = ?;
+
+-------------------------------------------------------
