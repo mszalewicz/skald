@@ -5,6 +5,7 @@ go 1.23.0
 require (
 	gioui.org v0.7.1
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231223183121-56fa3ac82ce7
+	github.com/google/uuid v1.6.0
 	github.com/mattn/go-sqlite3 v1.14.24
 )
 
