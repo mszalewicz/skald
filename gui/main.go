@@ -20,13 +20,13 @@ import (
 )
 
 type Screen struct {
-	Width  int
-	Height int
+	Width  int64
+	Height int64
 }
 
 type Settings struct {
 	Screen   Screen
-	Fontsize int
+	Fontsize int64
 }
 
 func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend *database.Backend) error {
@@ -75,18 +75,40 @@ func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend 
 						ctx := context.Background()
 						queries := database.New(backend.DB)
 
-						insertedSetting, err := queries.CreateSetting(ctx, database.CreateSettingParams{
-							Width:    3840,
-							Height:   2160,
-							Fontsize: 16,
-						})
+						settingOccurences, err := queries.CountSetting(context.Background(), int64(settings.Screen.Width))
 
 						if err != nil {
 							log.Fatal(err)
 						}
-						log.Println(insertedSetting)
+
+						fmt.Println(settingOccurences, settings.Screen.Width, settings.Screen.Height)
+
+						if settingOccurences == 0 {
+							insertedSetting, err := queries.CreateSetting(ctx, database.CreateSettingParams{
+								Width:    settings.Screen.Width,
+								Height:   settings.Screen.Height,
+								Fontsize: settings.Fontsize,
+							})
+
+							if err != nil {
+								log.Fatal(err)
+							}
+
+							log.Println(insertedSetting)
+						} else {
+							err := queries.UpdateSettingFont(context.Background(), database.UpdateSettingFontParams{Fontsize: settings.Fontsize, Width: settings.Screen.Width})
+
+							if err != nil {
+								log.Fatal(err)
+							}
+						}
 
 						settings, err := queries.ListSettings(ctx)
+
+						if err != nil {
+							log.Fatal(err)
+						}
+
 						for _, setting := range settings {
 							fmt.Println(setting.Width, setting.Height, setting.Fontsize)
 						}

@@ -15,12 +15,6 @@ UPDATE account
 SET name = ?
 WHERE uuid = ?;
 
-INSERT INTO account (
-  uuid, name
-) VALUES (
-  ?, ?, ?
-)
-RETURNING *;
 
 -----------------------------------------------------------------
 --- Settings ----------------------------------------------------
@@ -45,15 +39,17 @@ INSERT INTO settings (
 )
 RETURNING *;
 
--- name: UpdateSetting :exec
+-- name: UpdateSettingFont :exec
 UPDATE settings
-SET width = ?,
-height = ?,
-fontsize = ?
-WHERE id = ?;
+SET fontsize = ?
+WHERE width = ?;
 
--- name: DeleteAuthor :exec
+-- name: DeleteSetting :exec
 DELETE FROM settings
 WHERE id = ?;
+
+-- name: CountSetting :one
+SELECT count(*) FROM settings
+WHERE width = ?;
 
 -------------------------------------------------------

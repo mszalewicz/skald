@@ -9,6 +9,18 @@ import (
 	"context"
 )
 
+const countSetting = `-- name: CountSetting :one
+SELECT count(*) FROM settings
+WHERE width = ?
+`
+
+func (q *Queries) CountSetting(ctx context.Context, width int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countSetting, width)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createAccount = `-- name: CreateAccount :one
 
 INSERT INTO account (
@@ -61,13 +73,13 @@ func (q *Queries) CreateSetting(ctx context.Context, arg CreateSettingParams) (S
 	return i, err
 }
 
-const deleteAuthor = `-- name: DeleteAuthor :exec
+const deleteSetting = `-- name: DeleteSetting :exec
 DELETE FROM settings
 WHERE id = ?
 `
 
-func (q *Queries) DeleteAuthor(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteAuthor, id)
+func (q *Queries) DeleteSetting(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteSetting, id)
 	return err
 }
 
@@ -168,27 +180,18 @@ func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) er
 	return err
 }
 
-const updateSetting = `-- name: UpdateSetting :exec
+const updateSettingFont = `-- name: UpdateSettingFont :exec
 UPDATE settings
-SET width = ?,
-height = ?,
-fontsize = ?
-WHERE id = ?
+SET fontsize = ?
+WHERE width = ?
 `
 
-type UpdateSettingParams struct {
-	Width    int64
-	Height   int64
+type UpdateSettingFontParams struct {
 	Fontsize int64
-	ID       int64
+	Width    int64
 }
 
-func (q *Queries) UpdateSetting(ctx context.Context, arg UpdateSettingParams) error {
-	_, err := q.db.ExecContext(ctx, updateSetting,
-		arg.Width,
-		arg.Height,
-		arg.Fontsize,
-		arg.ID,
-	)
+func (q *Queries) UpdateSettingFont(ctx context.Context, arg UpdateSettingFontParams) error {
+	_, err := q.db.ExecContext(ctx, updateSettingFont, arg.Fontsize, arg.Width)
 	return err
 }

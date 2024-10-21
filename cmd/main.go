@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	_ "embed"
 	"fmt"
@@ -77,8 +78,6 @@ func main() {
 		minHeight int
 	)
 
-	settings.Fontsize = 10
-
 	localLog := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	slog.SetDefault(localLog)
 
@@ -87,12 +86,29 @@ func main() {
 	{ // Get monitor resolution
 		monitor := glfw.GetPrimaryMonitor()
 		mode := monitor.GetVideoMode()
-		screen.Width = mode.Width
-		screen.Height = mode.Height
+		screen.Width = int64(mode.Width)
+		screen.Height = int64(mode.Height)
 		width, height = gui.CalculateResolution(mode.Width, mode.Height, 0.9)
 		minWidth, minHeight = gui.CalculateResolution(mode.Width, mode.Height, 0.5)
 
 		glfw.Terminate()
+	}
+
+	settings.Fontsize = 10
+	settings.Screen.Width = screen.Width
+	settings.Screen.Height = screen.Height
+
+	{ // Insert setting if it does not exist
+		queries := database.New(backend.DB)
+		settingOccurences, err := queries.CountSetting(context.Background(), settings.Screen.Width)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if settingOccurences == 0 {
+			queries.CreateSetting(context.Background(), database.CreateSettingParams{Width: settings.Screen.Width, Height: settings.Screen.Height, Fontsize: settings.Fontsize})
+		}
 	}
 
 	go func() {
