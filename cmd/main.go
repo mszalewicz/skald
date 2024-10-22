@@ -94,7 +94,23 @@ func main() {
 		glfw.Terminate()
 	}
 
-	settings.Fontsize = 10
+	{ // Read setting for given resolution
+		queries := database.New(backend.DB)
+		fontsize, err := queries.GetFontSizeByWidth(context.Background(), screen.Width)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("fontsize:", fontsize)
+
+		if fontsize != 0 {
+			settings.Fontsize = fontsize
+		} else {
+			settings.Fontsize = 10
+		}
+	}
+
 	settings.Screen.Width = screen.Width
 	settings.Screen.Height = screen.Height
 

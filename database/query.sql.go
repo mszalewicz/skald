@@ -83,6 +83,18 @@ func (q *Queries) DeleteSetting(ctx context.Context, id int64) error {
 	return err
 }
 
+const getFontSizeByWidth = `-- name: GetFontSizeByWidth :one
+SELECT fontsize FROM settings
+WHERE width = ?
+`
+
+func (q *Queries) GetFontSizeByWidth(ctx context.Context, width int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getFontSizeByWidth, width)
+	var fontsize int64
+	err := row.Scan(&fontsize)
+	return fontsize, err
+}
+
 const getSettings = `-- name: GetSettings :many
 
 SELECT id, width, height, fontsize FROM settings

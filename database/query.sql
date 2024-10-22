@@ -27,6 +27,11 @@ SELECT * FROM settings;
 SELECT id FROM settings
 WHERE width = ?;
 
+-- name: GetFontSizeByWidth :one
+SELECT fontsize FROM settings
+WHERE width = ?;
+
+
 -- name: ListSettings :many
 SELECT * FROM settings
 ORDER BY width;

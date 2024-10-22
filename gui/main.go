@@ -7,8 +7,11 @@ import (
 	"gioui.org/app"
 	"gioui.org/font/gofont"
 	"gioui.org/io/key"
+	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/text"
+	"gioui.org/unit"
+	"gioui.org/widget"
 	"gioui.org/widget/material"
 
 	_ "embed"
@@ -35,6 +38,19 @@ func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend 
 	theme := material.NewTheme()
 	theme.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
 
+	text := `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel nisl vestibulum purus interdum sollicitudin. Pellentesque sodales velit eu odio varius euismod. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Sed eleifend nisl eget enim cursus posuere. Nunc felis arcu, rutrum vitae vulputate sit amet, porttitor scelerisque eros. Maecenas in lorem eu magna venenatis eleifend. Etiam tincidunt elit non tincidunt semper. Curabitur id porttitor mauris. Praesent euismod quam ut leo ullamcorper, sed sagittis ante finibus. Nullam ut sollicitudin quam, lacinia interdum nisi. Nunc volutpat velit venenatis, gravida lorem in, feugiat turpis.
+
+    Integer sem enim, elementum vel dui in, fringilla euismod sem. Maecenas dignissim, mauris sit amet feugiat molestie, elit urna tincidunt urna, nec lobortis odio ex a ligula. Etiam pellentesque lorem a est venenatis, a tincidunt mauris commodo. Sed id porttitor nisl. Fusce eleifend posuere odio at consequat. Nullam consectetur nisi eget lorem posuere, id auctor enim scelerisque. Sed ultrices aliquet imperdiet. Nullam varius mauris ac pharetra hendrerit. Curabitur egestas nulla ut dolor posuere dictum. Nulla facilisi. Nulla in venenatis tellus, et rutrum ante.
+
+    Etiam scelerisque mattis massa, quis blandit nulla blandit vitae. Duis neque est, cursus nec metus vitae, lacinia tristique sem. Fusce rutrum scelerisque risus, eget tempor turpis blandit a. Fusce scelerisque ante a metus luctus, id ornare nulla hendrerit. Nam sed lacinia lorem, eget tempus dui. Donec sed finibus sapien. Vivamus blandit libero commodo, posuere erat vitae, lobortis tortor.
+
+    Nulla blandit mauris in porttitor imperdiet. Sed gravida lectus varius convallis vehicula. Praesent viverra molestie nulla, non mollis tortor porta nec. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis arcu neque, molestie vitae est vel, congue hendrerit orci. Ut tincidunt orci ultricies luctus lobortis. Nunc sed justo id arcu dignissim vehicula. Mauris eget vulputate ex. Praesent hendrerit massa a dolor porta tempus. Vestibulum ultrices lacus et massa luctus lacinia. Nunc semper tempus diam vel posuere. Curabitur nec cursus augue.
+
+    Nam ac efficitur metus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Phasellus sodales neque est, eu hendrerit lacus viverra eu. Integer ipsum lectus, congue non lobortis id, vestibulum ac augue. Nam ex libero, semper sit amet justo quis, consequat imperdiet ipsum. In ac tempus nibh. Maecenas non sapien id urna tincidunt pretium sit amet in tellus. Mauris sagittis lectus rhoncus, aliquam quam et, suscipit erat. Aenean feugiat sit amet ante sit amet mollis. Quisque rhoncus viverra tempor. Pellentesque id ipsum imperdiet quam convallis interdum. Nunc condimentum lectus ut varius pellentesque.
+    `
+
+	list := widget.List{List: layout.List{Axis: layout.Vertical, Alignment: layout.Start}}
+
 	for {
 		switch e := window.Event().(type) {
 		case app.DestroyEvent:
@@ -42,6 +58,27 @@ func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend 
 
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
+
+			layout.Inset{Top: unit.Dp(40), Bottom: unit.Dp(40), Left: unit.Dp(40), Right: unit.Dp(40)}.Layout(
+				gtx,
+				func(gtx layout.Context) layout.Dimensions {
+					return layout.Flex{Axis: layout.Vertical, Alignment: layout.End}.Layout(
+						gtx,
+						layout.Flexed(
+							1,
+							func(gtx layout.Context) layout.Dimensions {
+								return list.Layout(
+									gtx,
+									1,
+									func(gtx layout.Context, index int) layout.Dimensions {
+										return material.Label(theme, unit.Sp(settings.Fontsize), text).Layout(gtx)
+									},
+								)
+							},
+						),
+					)
+				},
+			)
 
 			for {
 				ev, ok := gtx.Event(
@@ -70,9 +107,6 @@ func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend 
 							}
 						}
 
-						fmt.Println(settings.Fontsize)
-
-						ctx := context.Background()
 						queries := database.New(backend.DB)
 
 						settingOccurences, err := queries.CountSetting(context.Background(), int64(settings.Screen.Width))
@@ -81,10 +115,8 @@ func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend 
 							log.Fatal(err)
 						}
 
-						fmt.Println(settingOccurences, settings.Screen.Width, settings.Screen.Height)
-
 						if settingOccurences == 0 {
-							insertedSetting, err := queries.CreateSetting(ctx, database.CreateSettingParams{
+							insertedSetting, err := queries.CreateSetting(context.Background(), database.CreateSettingParams{
 								Width:    settings.Screen.Width,
 								Height:   settings.Screen.Height,
 								Fontsize: settings.Fontsize,
@@ -103,7 +135,7 @@ func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend 
 							}
 						}
 
-						settings, err := queries.ListSettings(ctx)
+						settings, err := queries.ListSettings(context.Background())
 
 						if err != nil {
 							log.Fatal(err)
@@ -113,6 +145,9 @@ func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend 
 							fmt.Println(setting.Width, setting.Height, setting.Fontsize)
 						}
 
+						go func() {
+							window.Invalidate()
+						}()
 					}
 
 				}
