@@ -15,6 +15,8 @@ UPDATE account
 SET name = ?
 WHERE uuid = ?;
 
+-- name: CountAccounts :one
+SELECT count(*) FROM account;
 
 -----------------------------------------------------------------
 --- Settings ----------------------------------------------------

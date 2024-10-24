@@ -1,7 +1,10 @@
 package database
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type Backend struct {
-	DB *sql.DB
+	DB      *sql.DB
+	Queries *Queries
 }
