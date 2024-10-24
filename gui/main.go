@@ -2,7 +2,6 @@ package gui
 
 import (
 	"context"
-	"fmt"
 
 	"gioui.org/app"
 	"gioui.org/font/gofont"
@@ -19,6 +18,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
+	"github.com/mszalewicz/skald/assert"
 	"github.com/mszalewicz/skald/database"
 )
 
@@ -33,6 +33,12 @@ type Settings struct {
 }
 
 func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend *database.Backend) error {
+
+	assert.AssertNil(window)
+	assert.AssertNil(screen)
+	assert.AssertNil(settings)
+	assert.AssertNil(backend)
+
 	var ops op.Ops
 
 	theme := material.NewTheme()
@@ -86,6 +92,8 @@ func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend 
 					key.Filter{Optional: key.ModCommand, Name: "-"},
 				)
 
+				// fmt.Printf("KEY: %+v\n", ev)
+
 				if !ok {
 					break
 				}
@@ -135,24 +143,11 @@ func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend 
 							}
 						}
 
-						settings, err := queries.ListSettings(context.Background())
-
-						if err != nil {
-							log.Fatal(err)
-						}
-
-						for _, setting := range settings {
-							fmt.Println(setting.Width, setting.Height, setting.Fontsize)
-						}
-
 						go func() {
 							window.Invalidate()
 						}()
 					}
-
 				}
-				// fmt.Printf("KEY: %+v\n", ev)
-				// fmt.Println(settings.Fontsize)
 			}
 
 			e.Frame(gtx.Ops)
