@@ -6,18 +6,38 @@ import (
 	"runtime/debug"
 )
 
+const anotationLen = 110
+
+func annotate(text string) {
+	if len(text) > 0 {
+		fmt.Fprintf(os.Stderr, "\n____ [ ")
+		fmt.Fprintf(os.Stderr, text)
+		fmt.Fprintf(os.Stderr, " ] ")
+		for range anotationLen - 10 - len(text) {
+			fmt.Fprintf(os.Stderr, "_")
+		}
+	} else {
+		for range anotationLen {
+			fmt.Fprintf(os.Stderr, "_")
+		}
+	}
+	fmt.Fprintf(os.Stderr, "\n\n")
+}
+
 func Assert(condition bool) {
 	if !condition {
-		fmt.Fprintf(os.Stderr, "ASSERT\n")
+		annotate("ASSERT")
 		fmt.Fprintln(os.Stderr, string(debug.Stack()))
+		annotate("")
 		os.Exit(1)
 	}
 }
 
-func AssertNil(object any) {
+func NotNil(object any) {
 	if object == nil {
-		fmt.Fprintf(os.Stderr, "ASSERT\n")
+		annotate("ASSERT_NIL")
 		fmt.Fprintln(os.Stderr, string(debug.Stack()))
+		annotate("")
 		os.Exit(1)
 	}
 }
