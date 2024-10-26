@@ -32,12 +32,16 @@ type Settings struct {
 	Fontsize int64
 }
 
-func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend *database.Backend) error {
-
-	assert.AssertNil(window)
-	assert.AssertNil(screen)
-	assert.AssertNil(settings)
-	assert.AssertNil(backend)
+func MainWindow(
+	window *app.Window,
+	screen *Screen,
+	settings *Settings,
+	backend *database.Backend,
+) error {
+	assert.NotNil(window)
+	assert.NotNil(screen)
+	assert.NotNil(settings)
+	assert.NotNil(backend)
 
 	var ops op.Ops
 
@@ -117,18 +121,23 @@ func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend 
 
 						queries := database.New(backend.DB)
 
-						settingOccurences, err := queries.CountSetting(context.Background(), int64(settings.Screen.Width))
+						settingOccurences, err := queries.CountSetting(
+							context.Background(),
+							int64(settings.Screen.Width),
+						)
 
 						if err != nil {
 							log.Fatal(err)
 						}
 
 						if settingOccurences == 0 {
-							insertedSetting, err := queries.CreateSetting(context.Background(), database.CreateSettingParams{
-								Width:    settings.Screen.Width,
-								Height:   settings.Screen.Height,
-								Fontsize: settings.Fontsize,
-							})
+							insertedSetting, err := queries.CreateSetting(
+								context.Background(),
+								database.CreateSettingParams{
+									Width:    settings.Screen.Width,
+									Height:   settings.Screen.Height,
+									Fontsize: settings.Fontsize,
+								})
 
 							if err != nil {
 								log.Fatal(err)
@@ -136,7 +145,12 @@ func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend 
 
 							log.Println(insertedSetting)
 						} else {
-							err := queries.UpdateSettingFont(context.Background(), database.UpdateSettingFontParams{Fontsize: settings.Fontsize, Width: settings.Screen.Width})
+							err := queries.UpdateSettingFont(
+								context.Background(),
+								database.UpdateSettingFontParams{
+									Fontsize: settings.Fontsize,
+									Width:    settings.Screen.Width,
+								})
 
 							if err != nil {
 								log.Fatal(err)
@@ -152,6 +166,37 @@ func MainWindow(window *app.Window, screen *Screen, settings *Settings, backend 
 
 			e.Frame(gtx.Ops)
 
+		}
+	}
+}
+
+func AccountCreation(
+	window *app.Window,
+	screen *Screen,
+	settings *Settings,
+	backend *database.Backend,
+	uuid string,
+) error {
+	assert.NotNil(window)
+	assert.NotNil(screen)
+	assert.NotNil(settings)
+	assert.NotNil(backend)
+	assert.Assert(len(uuid) == 36)
+
+	var ops op.Ops
+
+	theme := material.NewTheme()
+	theme.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
+
+	for {
+		switch e := window.Event().(type) {
+		case app.DestroyEvent:
+			return e.Err
+
+		case app.FrameEvent:
+			gtx := app.NewContext(&ops, e)
+
+			e.Frame(gtx.Ops)
 		}
 	}
 }

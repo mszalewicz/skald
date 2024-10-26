@@ -17,7 +17,6 @@ import (
 	"github.com/mszalewicz/skald/assert"
 	"github.com/mszalewicz/skald/database"
 	"github.com/mszalewicz/skald/gui"
-	"github.com/mszalewicz/skald/network"
 )
 
 //go:embed schema.sql
@@ -52,15 +51,14 @@ func init() {
 		}
 
 		backend.DB = db
-		assert.AssertNil(backend.DB)
+		assert.NotNil(backend.DB)
 
 		// Create tables
 		if _, err := backend.DB.Exec(schema); err != nil {
 			log.Fatal(err)
 		}
 
-		a := uuid.NewString()
-		fmt.Println(a)
+		backend.Queries = database.New(backend.DB)
 	}
 
 	if err := glfw.Init(); err != nil {
@@ -81,8 +79,6 @@ func main() {
 	localLog := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	slog.SetDefault(localLog)
 
-	_ = network.Backend{}
-
 	{ // Get monitor resolution
 		monitor := glfw.GetPrimaryMonitor()
 		mode := monitor.GetVideoMode()
@@ -95,14 +91,11 @@ func main() {
 	}
 
 	{ // Read setting for given resolution
-		queries := database.New(backend.DB)
-		fontsize, err := queries.GetFontSizeByWidth(context.Background(), screen.Width)
+		fontsize, err := backend.Queries.GetFontSizeByWidth(context.Background(), screen.Width)
 
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		fmt.Println("fontsize:", fontsize)
 
 		if fontsize != 0 {
 			settings.Fontsize = fontsize
@@ -123,7 +116,11 @@ func main() {
 		}
 
 		if settingOccurences == 0 {
-			queries.CreateSetting(context.Background(), database.CreateSettingParams{Width: settings.Screen.Width, Height: settings.Screen.Height, Fontsize: settings.Fontsize})
+			queries.CreateSetting(context.Background(), database.CreateSettingParams{
+				Width:    settings.Screen.Width,
+				Height:   settings.Screen.Height,
+				Fontsize: settings.Fontsize,
+			})
 		}
 	}
 
@@ -132,6 +129,31 @@ func main() {
 		window.Option(app.Title("Skald"))
 		window.Option(app.Size(unit.Dp(width), unit.Dp(height)))
 		window.Option(app.MinSize(unit.Dp(minWidth), unit.Dp(minHeight)))
+
+		assert.NotNil(backend)
+		assert.NotNil(screen)
+		assert.NotNil(settings)
+		assert.NotNil(settings)
+		assert.NotNil(window)
+
+		{ // Check if local account exists
+			numberOfAccounts, err := backend.Queries.CountAccounts(context.Background())
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if numberOfAccounts == 0 {
+				uuid := uuid.NewString()
+				fmt.Println(uuid)
+				err := gui.AccountCreation(window, &screen, &settings, &backend, uuid)
+
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+		}
+
 		err := gui.MainWindow(window, &screen, &settings, &backend)
 
 		if err != nil {
