@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
-	"fmt"
 	"log"
 	"log/slog"
 	"net/url"
@@ -13,7 +12,6 @@ import (
 	"gioui.org/app"
 	"gioui.org/unit"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/google/uuid"
 	"github.com/mszalewicz/skald/assert"
 	"github.com/mszalewicz/skald/database"
 	"github.com/mszalewicz/skald/gui"
@@ -143,15 +141,16 @@ func main() {
 				log.Fatal(err)
 			}
 
-			if numberOfAccounts == 0 {
-				uuid := uuid.NewString()
-				fmt.Println(uuid)
-				err := gui.AccountCreation(window, &screen, &settings, &backend, uuid)
+			_ = numberOfAccounts
+			// if numberOfAccounts == 0 {
+			// 	uuid := uuid.NewString()
+			// 	fmt.Println(uuid)
+			// 	err := gui.AccountCreation(window, &screen, &settings, &backend, uuid)
 
-				if err != nil {
-					log.Fatal(err)
-				}
-			}
+			// 	if err != nil {
+			// 		log.Fatal(err)
+			// 	}
+			// }
 		}
 
 		err := gui.MainWindow(window, &screen, &settings, &backend)
