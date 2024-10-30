@@ -11,7 +11,7 @@ const anotationLen = 110
 func annotate(text string) {
 	if len(text) > 0 {
 		fmt.Fprintf(os.Stderr, "\n____ [ ")
-		fmt.Fprintf(os.Stderr, text)
+		fmt.Fprint(os.Stderr, text)
 		fmt.Fprintf(os.Stderr, " ] ")
 		for range anotationLen - 10 - len(text) {
 			fmt.Fprintf(os.Stderr, "_")

@@ -114,11 +114,15 @@ func main() {
 		}
 
 		if settingOccurences == 0 {
-			queries.CreateSetting(context.Background(), database.CreateSettingParams{
+			err := queries.CreateSetting(context.Background(), database.CreateSettingParams{
 				Width:    settings.Screen.Width,
 				Height:   settings.Screen.Height,
 				Fontsize: settings.Fontsize,
 			})
+
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 

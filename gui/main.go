@@ -111,7 +111,7 @@ func MainWindow(
 						}
 
 						if settingOccurences == 0 {
-							insertedSetting, err := queries.CreateSetting(
+							err := queries.CreateSetting(
 								context.Background(),
 								database.CreateSettingParams{
 									Width:    settings.Screen.Width,
@@ -122,8 +122,6 @@ func MainWindow(
 							if err != nil {
 								log.Fatal(err)
 							}
-
-							log.Println(insertedSetting)
 						} else {
 							err := queries.UpdateSettingFont(
 								context.Background(),
