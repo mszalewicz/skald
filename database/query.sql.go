@@ -57,13 +57,12 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 	return i, err
 }
 
-const createSetting = `-- name: CreateSetting :one
+const createSetting = `-- name: CreateSetting :exec
 INSERT INTO settings (
   width, height, fontsize
 ) VALUES (
   ?, ?, ?
 )
-RETURNING id, width, height, fontsize
 `
 
 type CreateSettingParams struct {
@@ -72,16 +71,9 @@ type CreateSettingParams struct {
 	Fontsize int64
 }
 
-func (q *Queries) CreateSetting(ctx context.Context, arg CreateSettingParams) (Setting, error) {
-	row := q.db.QueryRowContext(ctx, createSetting, arg.Width, arg.Height, arg.Fontsize)
-	var i Setting
-	err := row.Scan(
-		&i.ID,
-		&i.Width,
-		&i.Height,
-		&i.Fontsize,
-	)
-	return i, err
+func (q *Queries) CreateSetting(ctx context.Context, arg CreateSettingParams) error {
+	_, err := q.db.ExecContext(ctx, createSetting, arg.Width, arg.Height, arg.Fontsize)
+	return err
 }
 
 const deleteSetting = `-- name: DeleteSetting :exec
@@ -204,6 +196,7 @@ func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) er
 }
 
 const updateSettingFont = `-- name: UpdateSettingFont :exec
+
 UPDATE settings
 SET fontsize = ?
 WHERE width = ?
@@ -214,6 +207,7 @@ type UpdateSettingFontParams struct {
 	Width    int64
 }
 
+// RETURNING *;
 func (q *Queries) UpdateSettingFont(ctx context.Context, arg UpdateSettingFontParams) error {
 	_, err := q.db.ExecContext(ctx, updateSettingFont, arg.Fontsize, arg.Width)
 	return err

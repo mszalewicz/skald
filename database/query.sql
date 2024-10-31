@@ -38,13 +38,13 @@ WHERE width = ?;
 SELECT * FROM settings
 ORDER BY width;
 
--- name: CreateSetting :one
+-- name: CreateSetting :exec
 INSERT INTO settings (
   width, height, fontsize
 ) VALUES (
   ?, ?, ?
-)
-RETURNING *;
+);
+-- RETURNING *;
 
 -- name: UpdateSettingFont :exec
 UPDATE settings
